@@ -54,8 +54,8 @@ export default function Tile({ tile, selected, isJoker, faceDown, onClick, small
 
   const tileStyle: React.CSSProperties = {
     ...baseStyle,
-    background: '#fff',
-    color: tileColor,
+    background: tileColor,
+    color: '#fff',
     boxShadow: selected
       ? `0 0 0 3px #1976d2, 0 4px 12px rgba(0,0,0,0.4)`
       : isJoker
