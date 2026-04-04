@@ -4,7 +4,6 @@ import PlayerHand from './PlayerHand';
 import OpponentPanel from './OpponentPanel';
 import MeldsArea from './MeldsArea';
 import DrawArea from './DrawArea';
-import IndicatorDisplay from './IndicatorDisplay';
 
 interface GameBoardProps {
   gameState: GameState;
@@ -161,6 +160,7 @@ export default function GameBoard({ gameState, sendMessage }: GameBoardProps) {
           <DrawArea
             drawPileCount={drawPileCount}
             lastDiscard={lastDiscard}
+            indicatorTile={indicatorTile}
             jokerTile={jokerTile}
             canDraw={canDraw}
             onDrawFromPile={handleDrawFromPile}
@@ -194,15 +194,6 @@ export default function GameBoard({ gameState, sendMessage }: GameBoardProps) {
         onDiscard={handleDiscard}
       />
 
-      {/* Top-right corner: indicator */}
-      <div style={{
-        position: 'absolute',
-        top: '12px',
-        right: '12px',
-        zIndex: 10,
-      }}>
-        <IndicatorDisplay indicatorTile={indicatorTile} jokerTile={jokerTile} />
-      </div>
     </div>
   );
 }

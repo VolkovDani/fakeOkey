@@ -1,11 +1,13 @@
 import { type Tile as TileType, type TileColor } from 'shared/types';
 import { isJoker } from 'shared/gameLogic';
 import TileComponent from './Tile';
+import IndicatorDisplay from './IndicatorDisplay';
 import { useI18n } from '../i18n';
 
 interface DrawAreaProps {
   drawPileCount: number;
   lastDiscard: TileType | null;
+  indicatorTile: TileType;
   jokerTile: { color: TileColor; number: number };
   canDraw: boolean;
   onDrawFromPile: () => void;
@@ -17,6 +19,7 @@ const FAKE_TILE = { id: -2, color: 'black' as TileColor, number: 1, isFalseJoker
 export default function DrawArea({
   drawPileCount,
   lastDiscard,
+  indicatorTile,
   jokerTile,
   canDraw,
   onDrawFromPile,
@@ -31,6 +34,10 @@ export default function DrawArea({
       gap: '24px',
       padding: '16px',
     }}>
+      <IndicatorDisplay indicatorTile={indicatorTile} jokerTile={jokerTile} />
+
+      <div style={{ opacity: 0.4, fontSize: '1.5rem' }}>|</div>
+
       <div
         onClick={canDraw ? onDrawFromPile : undefined}
         style={{
