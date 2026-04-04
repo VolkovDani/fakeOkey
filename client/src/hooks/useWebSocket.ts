@@ -1,6 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { type GameState, type ClientMessage, type ServerMessage } from 'shared/types';
 
+export interface DisconnectInfo {
+  playerName: string;
+  remainingSeconds: number;
+}
+
 interface UseWebSocketReturn {
   gameState: GameState | null;
   connected: boolean;
@@ -9,6 +14,7 @@ interface UseWebSocketReturn {
   error: string | null;
   roundScores: Record<string, number> | null;
   totalScores: Record<string, number> | null;
+  disconnectInfo: DisconnectInfo | null;
   sendMessage: (msg: ClientMessage) => void;
 }
 
@@ -20,6 +26,7 @@ export function useWebSocket(url: string): UseWebSocketReturn {
   const [error, setError] = useState<string | null>(null);
   const [roundScores, setRoundScores] = useState<Record<string, number> | null>(null);
   const [totalScores, setTotalScores] = useState<Record<string, number> | null>(null);
+  const [disconnectInfo, setDisconnectInfo] = useState<DisconnectInfo | null>(null);
 
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -67,16 +74,20 @@ export function useWebSocket(url: string): UseWebSocketReturn {
             break;
           case 'player_joined':
             setPlayers(msg.players);
+            setDisconnectInfo(null);
             break;
           case 'round_end':
             setRoundScores(msg.scores);
             setTotalScores(msg.totalScores);
+            setGameState((prev) => prev ? { ...prev, phase: 'round_end' } : prev);
             break;
           case 'game_over':
             setTotalScores(msg.finalScores);
+            setGameState((prev) => prev ? { ...prev, phase: 'game_over' } : prev);
+            setDisconnectInfo(null);
             break;
           case 'player_left':
-            // game_state broadcast will update the UI
+            setDisconnectInfo({ playerName: msg.playerName, remainingSeconds: msg.remainingSeconds });
             break;
         }
       };
@@ -112,5 +123,5 @@ export function useWebSocket(url: string): UseWebSocketReturn {
     };
   }, [url]);
 
-  return { gameState, connected, roomId, players, error, roundScores, totalScores, sendMessage };
+  return { gameState, connected, roomId, players, error, roundScores, totalScores, disconnectInfo, sendMessage };
 }

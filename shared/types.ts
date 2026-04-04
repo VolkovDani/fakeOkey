@@ -53,7 +53,7 @@ export type ServerMessage =
   | { type: "player_joined"; name: string; players: string[] }
   | { type: "round_end"; scores: Record<string, number>; totalScores: Record<string, number> }
   | { type: "game_over"; finalScores: Record<string, number> }
-  | { type: "player_left"; playerId: string; playerName: string };
+  | { type: "player_left"; playerId: string; playerName: string; remainingSeconds: number };
 
 export interface RoundContext {
   winnerId: string;

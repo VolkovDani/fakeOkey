@@ -651,7 +651,7 @@ const handleDisconnect = (ws: WebSocket): void => {
       player.disconnected = true;
     }
 
-    broadcast(room, { type: "player_left", playerId, playerName });
+    broadcast(room, { type: "player_left", playerId, playerName, remainingSeconds: 120 });
 
     // If ALL players are disconnected, delete room immediately
     const connectedPlayers = [...room.players.values()].filter((p) => !p.disconnected);

@@ -36,6 +36,8 @@ const en = {
   pts: 'pts',
   turn: 'TURN',
   disconnected: 'disconnected',
+  playerDisconnected: '{name} disconnected',
+  roomClosesIn: 'Room closes in',
 
   // Game - IndicatorDisplay
   indicator: 'Indicator',

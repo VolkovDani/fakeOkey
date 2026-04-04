@@ -33,6 +33,8 @@ const ru: Translations = {
   pts: 'очк.',
   turn: 'ХОД',
   disconnected: 'отключён',
+  playerDisconnected: '{name} отключился',
+  roomClosesIn: 'Комната закроется через',
 
   indicator: 'Индикатор',
   joker: 'Джокер:',

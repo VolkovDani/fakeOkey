@@ -5,6 +5,7 @@ import LobbyScreen from './components/LobbyScreen';
 import GameBoard from './components/GameBoard';
 import ScoreBoard from './components/ScoreBoard';
 import LanguageSwitcher from './components/LanguageSwitcher';
+import DisconnectOverlay from './components/DisconnectOverlay';
 
 function App() {
   const { t } = useI18n();
@@ -16,6 +17,7 @@ function App() {
     error,
     roundScores,
     totalScores,
+    disconnectInfo,
     sendMessage,
   } = useWebSocket(`${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/ws`);
 
@@ -68,6 +70,8 @@ function App() {
           isFinal={true}
         />
       )}
+
+      {disconnectInfo && <DisconnectOverlay info={disconnectInfo} />}
     </div>
   );
 }
