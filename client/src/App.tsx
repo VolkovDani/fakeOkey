@@ -1,10 +1,13 @@
 import './App.css';
 import { useWebSocket } from './hooks/useWebSocket';
+import { useI18n } from './i18n';
 import LobbyScreen from './components/LobbyScreen';
 import GameBoard from './components/GameBoard';
 import ScoreBoard from './components/ScoreBoard';
+import LanguageSwitcher from './components/LanguageSwitcher';
 
 function App() {
+  const { t } = useI18n();
   const {
     gameState,
     connected,
@@ -17,12 +20,24 @@ function App() {
   } = useWebSocket(`${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/ws`);
 
   if (!connected) {
-    return <div className="connecting">Connecting...</div>;
+    return (
+      <>
+        <div style={{ position: 'fixed', top: 12, left: 12, zIndex: 100 }}>
+          <LanguageSwitcher />
+        </div>
+        <div className="connecting">{t('connecting')}</div>
+      </>
+    );
   }
+
+  const errorText = error === 'connection_error' ? t('connectionError') : error;
 
   return (
     <div className="app">
-      {error && <div className="error-banner">{error}</div>}
+      <div style={{ position: 'fixed', top: 12, left: 12, zIndex: 100 }}>
+        <LanguageSwitcher />
+      </div>
+      {errorText && <div className="error-banner">{errorText}</div>}
 
       {(!gameState || gameState.phase === 'lobby') && (
         <LobbyScreen

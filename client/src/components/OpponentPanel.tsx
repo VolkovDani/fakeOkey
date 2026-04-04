@@ -1,6 +1,7 @@
 import { type PlayerState, type TileColor } from 'shared/types';
 import { isJoker } from 'shared/gameLogic';
 import TileComponent from './Tile';
+import { useI18n } from '../i18n';
 
 interface OpponentPanelProps {
   player: PlayerState;
@@ -12,6 +13,7 @@ interface OpponentPanelProps {
 const FAKE_TILE = { id: -1, color: 'black' as TileColor, number: 1, isFalseJoker: false };
 
 export default function OpponentPanel({ player, isCurrentTurn, jokerTile, position }: OpponentPanelProps) {
+  const { t } = useI18n();
   const isVertical = position === 'left' || position === 'right';
 
   const panelStyle: React.CSSProperties = {
@@ -44,7 +46,7 @@ export default function OpponentPanel({ player, isCurrentTurn, jokerTile, positi
           {player.name}
         </div>
         <div style={{ fontSize: '0.75rem', opacity: 0.6 }}>
-          {player.score} pts
+          {player.score} {t('pts')}
         </div>
         {isCurrentTurn && (
           <div style={{
@@ -55,7 +57,7 @@ export default function OpponentPanel({ player, isCurrentTurn, jokerTile, positi
             padding: '1px 6px',
             marginTop: '2px',
           }}>
-            TURN
+            {t('turn')}
           </div>
         )}
       </div>

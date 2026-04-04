@@ -1,6 +1,7 @@
 import { type Tile as TileType, type TileColor } from 'shared/types';
 import { isJoker } from 'shared/gameLogic';
 import TileComponent from './Tile';
+import { useI18n } from '../i18n';
 
 interface DrawAreaProps {
   drawPileCount: number;
@@ -21,6 +22,7 @@ export default function DrawArea({
   onDrawFromPile,
   onDrawFromDiscard,
 }: DrawAreaProps) {
+  const { t } = useI18n();
   return (
     <div style={{
       display: 'flex',
@@ -57,7 +59,7 @@ export default function DrawArea({
           )}
         </div>
         <div style={{ fontSize: '0.8rem', opacity: 0.8 }}>
-          Draw Pile ({drawPileCount})
+          {t('drawPileCount', { count: drawPileCount })}
         </div>
       </div>
 
@@ -91,11 +93,11 @@ export default function DrawArea({
             fontSize: '0.7rem',
             opacity: 0.4,
           }}>
-            Empty
+            {t('empty')}
           </div>
         )}
         <div style={{ fontSize: '0.8rem', opacity: 0.8 }}>
-          Discard
+          {t('discard')}
         </div>
       </div>
     </div>

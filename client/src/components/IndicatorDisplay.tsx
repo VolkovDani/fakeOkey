@@ -1,5 +1,6 @@
 import { type Tile as TileType, type TileColor } from 'shared/types';
 import TileComponent from './Tile';
+import { useI18n } from '../i18n';
 
 interface IndicatorDisplayProps {
   indicatorTile: TileType;
@@ -7,6 +8,7 @@ interface IndicatorDisplayProps {
 }
 
 export default function IndicatorDisplay({ indicatorTile, jokerTile }: IndicatorDisplayProps) {
+  const { t } = useI18n();
   return (
     <div style={{
       display: 'flex',
@@ -19,11 +21,11 @@ export default function IndicatorDisplay({ indicatorTile, jokerTile }: Indicator
       minWidth: '80px',
     }}>
       <div style={{ fontSize: '0.65rem', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-        Indicator
+        {t('indicator')}
       </div>
       <TileComponent tile={indicatorTile} small />
       <div style={{ fontSize: '0.65rem', opacity: 0.8, textAlign: 'center' }}>
-        <div style={{ opacity: 0.6 }}>Joker:</div>
+        <div style={{ opacity: 0.6 }}>{t('joker')}</div>
         <div style={{ fontWeight: 700, color: jokerTileColor(jokerTile.color) }}>
           {jokerTile.color} {jokerTile.number}
         </div>

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { type ClientMessage } from 'shared/types';
+import { useI18n } from '../i18n';
 
 interface LobbyScreenProps {
   roomId: string | null;
@@ -8,6 +9,7 @@ interface LobbyScreenProps {
 }
 
 export default function LobbyScreen({ roomId, players, sendMessage }: LobbyScreenProps) {
+  const { t } = useI18n();
   const [name, setName] = useState('');
   const [maxPlayers, setMaxPlayers] = useState<2 | 3 | 4>(4);
   const [joinCode, setJoinCode] = useState('');
@@ -80,10 +82,10 @@ export default function LobbyScreen({ roomId, players, sendMessage }: LobbyScree
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
         <div style={cardStyle}>
           <h1 style={{ textAlign: 'center', marginBottom: '24px', fontSize: '2rem', fontWeight: 700 }}>
-            Okey 101
+            {t('gameTitle')}
           </h1>
           <div style={{ ...sectionStyle, alignItems: 'center', gap: '16px' }}>
-            <div style={{ fontSize: '1.1rem', opacity: 0.8 }}>Room Code</div>
+            <div style={{ fontSize: '1.1rem', opacity: 0.8 }}>{t('roomCode')}</div>
             <div style={{
               fontSize: '2.5rem',
               fontWeight: 700,
@@ -95,7 +97,7 @@ export default function LobbyScreen({ roomId, players, sendMessage }: LobbyScree
               {roomId}
             </div>
             <div style={{ width: '100%' }}>
-              <div style={{ marginBottom: '8px', opacity: 0.7 }}>Players ({players.length}):</div>
+              <div style={{ marginBottom: '8px', opacity: 0.7 }}>{t('playersCount', { count: players.length })}</div>
               <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {players.map((p) => (
                   <li key={p} style={{
@@ -113,7 +115,7 @@ export default function LobbyScreen({ roomId, players, sendMessage }: LobbyScree
               </ul>
             </div>
             <div style={{ opacity: 0.6, fontSize: '0.9rem', marginTop: '8px' }}>
-              Waiting for players...
+              {t('waitingForPlayers')}
             </div>
           </div>
         </div>
@@ -125,15 +127,15 @@ export default function LobbyScreen({ roomId, players, sendMessage }: LobbyScree
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
       <div style={cardStyle}>
         <h1 style={{ textAlign: 'center', marginBottom: '24px', fontSize: '2rem', fontWeight: 700 }}>
-          Okey 101
+          {t('gameTitle')}
         </h1>
 
         <div style={{ marginBottom: '20px' }}>
-          <label style={labelStyle}>Your Name</label>
+          <label style={labelStyle}>{t('yourName')}</label>
           <input
             style={inputStyle}
             type="text"
-            placeholder="Enter your name"
+            placeholder={t('enterYourName')}
             value={name}
             onChange={(e) => setName(e.target.value)}
             maxLength={20}
@@ -142,30 +144,30 @@ export default function LobbyScreen({ roomId, players, sendMessage }: LobbyScree
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div style={sectionStyle}>
-            <div style={{ fontWeight: 600, fontSize: '1rem' }}>Create Room</div>
+            <div style={{ fontWeight: 600, fontSize: '1rem' }}>{t('createRoom')}</div>
             <div>
-              <label style={labelStyle}>Number of Players</label>
+              <label style={labelStyle}>{t('numberOfPlayers')}</label>
               <select
                 style={selectStyle}
                 value={maxPlayers}
                 onChange={(e) => setMaxPlayers(Number(e.target.value) as 2 | 3 | 4)}
               >
-                <option value={2}>2 Players</option>
-                <option value={3}>3 Players</option>
-                <option value={4}>4 Players</option>
+                <option value={2}>{t('nPlayers', { count: 2 })}</option>
+                <option value={3}>{t('nPlayers', { count: 3 })}</option>
+                <option value={4}>{t('nPlayers', { count: 4 })}</option>
               </select>
             </div>
             <button style={btnStyle} onClick={handleCreate}>
-              Create Room
+              {t('createRoom')}
             </button>
           </div>
 
-          <div style={{ textAlign: 'center', opacity: 0.5, fontSize: '0.85rem' }}>or</div>
+          <div style={{ textAlign: 'center', opacity: 0.5, fontSize: '0.85rem' }}>{t('or')}</div>
 
           <div style={sectionStyle}>
-            <div style={{ fontWeight: 600, fontSize: '1rem' }}>Join Room</div>
+            <div style={{ fontWeight: 600, fontSize: '1rem' }}>{t('joinRoom')}</div>
             <div>
-              <label style={labelStyle}>Room Code</label>
+              <label style={labelStyle}>{t('roomCode')}</label>
               <input
                 style={{ ...inputStyle, textTransform: 'uppercase', letterSpacing: '4px', textAlign: 'center' }}
                 type="text"
@@ -176,7 +178,7 @@ export default function LobbyScreen({ roomId, players, sendMessage }: LobbyScree
               />
             </div>
             <button style={{ ...btnStyle, background: '#1565c0' }} onClick={handleJoin}>
-              Join Room
+              {t('joinRoom')}
             </button>
           </div>
         </div>

@@ -1,6 +1,7 @@
 import { type PlayerState, type TileColor } from 'shared/types';
 import { isJoker } from 'shared/gameLogic';
 import TileComponent from './Tile';
+import { useI18n } from '../i18n';
 
 interface MeldsAreaProps {
   players: PlayerState[];
@@ -9,6 +10,7 @@ interface MeldsAreaProps {
 }
 
 export default function MeldsArea({ players, jokerTile, onExtendMeld }: MeldsAreaProps) {
+  const { t } = useI18n();
   const playersWithMelds = players.filter((p) => p.melds.length > 0);
 
   if (playersWithMelds.length === 0) {
@@ -22,7 +24,7 @@ export default function MeldsArea({ players, jokerTile, onExtendMeld }: MeldsAre
         fontSize: '0.9rem',
         fontStyle: 'italic',
       }}>
-        No melds yet
+        {t('noMeldsYet')}
       </div>
     );
   }
@@ -48,7 +50,7 @@ export default function MeldsArea({ players, jokerTile, onExtendMeld }: MeldsAre
                 padding: '1px 6px',
                 borderRadius: '4px',
               }}>
-                {player.meldMethod === 'pairs' ? 'Pairs' : 'Sets/Runs'}
+                {player.meldMethod === 'pairs' ? t('pairs') : t('setsRuns')}
               </span>
             )}
           </div>

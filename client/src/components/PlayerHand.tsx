@@ -1,6 +1,7 @@
 import { type Tile as TileType, type TileColor } from 'shared/types';
 import { isJoker } from 'shared/gameLogic';
 import TileComponent from './Tile';
+import { useI18n } from '../i18n';
 
 interface PlayerHandProps {
   tiles: TileType[];
@@ -13,12 +14,6 @@ interface PlayerHandProps {
   onDiscard: () => void;
 }
 
-const TURN_STATE_LABELS: Record<string, string> = {
-  must_draw: 'Draw a tile',
-  can_meld: 'Meld or discard',
-  must_discard: 'Discard a tile',
-};
-
 export default function PlayerHand({
   tiles,
   jokerTile,
@@ -29,7 +24,14 @@ export default function PlayerHand({
   onMeld,
   onDiscard,
 }: PlayerHandProps) {
+  const { t } = useI18n();
   const selectedCount = selectedTileIds.size;
+
+  const TURN_STATE_LABELS: Record<string, string> = {
+    must_draw: t('drawATile'),
+    can_meld: t('meldOrDiscard'),
+    must_discard: t('discardATile'),
+  };
   const canMeld = selectedCount >= 2;
   const canDiscard = selectedCount === 1;
 
@@ -63,7 +65,7 @@ export default function PlayerHand({
           border: isMyTurn ? '1px solid #4caf50' : '1px solid rgba(255,255,255,0.2)',
           color: isMyTurn ? '#a5d6a7' : 'rgba(255,255,255,0.6)',
         }}>
-          {isMyTurn ? turnStateLabel : 'Waiting for your turn'}
+          {isMyTurn ? turnStateLabel : t('waitingForYourTurn')}
         </div>
 
         <div style={{ display: 'flex', gap: '10px' }}>
@@ -77,7 +79,7 @@ export default function PlayerHand({
             disabled={!canMeld || !isMyTurn}
             onClick={onMeld}
           >
-            Meld ({selectedCount})
+            {t('meldCount', { count: selectedCount })}
           </button>
           <button
             style={{
@@ -89,7 +91,7 @@ export default function PlayerHand({
             disabled={!canDiscard || !isMyTurn}
             onClick={onDiscard}
           >
-            Discard
+            {t('discard')}
           </button>
         </div>
       </div>

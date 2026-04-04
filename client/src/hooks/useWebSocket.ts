@@ -89,7 +89,7 @@ export function useWebSocket(url: string): UseWebSocketReturn {
 
       ws.onerror = () => {
         if (unmountedRef.current) return;
-        setError('Connection error. Retrying...');
+        setError('connection_error');
       };
     }
 

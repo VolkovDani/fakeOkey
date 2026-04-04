@@ -1,4 +1,5 @@
 import { type PlayerState } from 'shared/types';
+import { useI18n } from '../i18n';
 
 interface ScoreBoardProps {
   scores: Record<string, number> | null;
@@ -9,6 +10,7 @@ interface ScoreBoardProps {
 }
 
 export default function ScoreBoard({ scores, totalScores, players, isFinal, onContinue }: ScoreBoardProps) {
+  const { t } = useI18n();
   // Find winner (lowest total score)
   let winnerId: string | null = null;
   if (isFinal && totalScores) {
@@ -75,7 +77,7 @@ export default function ScoreBoard({ scores, totalScores, players, isFinal, onCo
           fontSize: isFinal ? '2rem' : '1.5rem',
           fontWeight: 700,
         }}>
-          {isFinal ? 'Game Over!' : 'Round End'}
+          {isFinal ? t('gameOver') : t('roundEnd')}
         </h2>
         {isFinal && winnerId && (
           <div style={{
@@ -84,7 +86,7 @@ export default function ScoreBoard({ scores, totalScores, players, isFinal, onCo
             color: '#ffd54f',
             fontSize: '1.1rem',
           }}>
-            Winner: {players.find((p) => p.id === winnerId)?.name ?? winnerId}
+            {t('winner', { name: players.find((p) => p.id === winnerId)?.name ?? winnerId })}
           </div>
         )}
         {!isFinal && (
@@ -94,9 +96,9 @@ export default function ScoreBoard({ scores, totalScores, players, isFinal, onCo
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr>
-              <th style={thStyle}>Player</th>
-              {scores && <th style={{ ...thStyle, textAlign: 'right' }}>Round</th>}
-              <th style={{ ...thStyle, textAlign: 'right' }}>Total</th>
+              <th style={thStyle}>{t('player')}</th>
+              {scores && <th style={{ ...thStyle, textAlign: 'right' }}>{t('round')}</th>}
+              <th style={{ ...thStyle, textAlign: 'right' }}>{t('total')}</th>
             </tr>
           </thead>
           <tbody>
@@ -129,7 +131,7 @@ export default function ScoreBoard({ scores, totalScores, players, isFinal, onCo
                           padding: '1px 6px',
                           fontWeight: 700,
                         }}>
-                          WIN
+                          {t('win')}
                         </span>
                       )}
                     </div>
@@ -169,7 +171,7 @@ export default function ScoreBoard({ scores, totalScores, players, isFinal, onCo
                 cursor: 'pointer',
               }}
             >
-              Next Round
+              {t('nextRound')}
             </button>
           </div>
         )}
