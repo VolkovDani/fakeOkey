@@ -1,4 +1,4 @@
-import { type PlayerState } from '../../../shared/types';
+import { type PlayerState } from 'shared/types';
 
 interface ScoreBoardProps {
   scores: Record<string, number> | null;

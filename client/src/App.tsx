@@ -14,7 +14,7 @@ function App() {
     roundScores,
     totalScores,
     sendMessage,
-  } = useWebSocket('ws://localhost:3001');
+  } = useWebSocket(`${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/ws`);
 
   if (!connected) {
     return <div className="connecting">Connecting...</div>;

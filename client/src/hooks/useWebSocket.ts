@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { type GameState, type ClientMessage, type ServerMessage } from '../../../shared/types';
+import { type GameState, type ClientMessage, type ServerMessage } from 'shared/types';
 
 interface UseWebSocketReturn {
   gameState: GameState | null;

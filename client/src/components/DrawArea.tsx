@@ -1,5 +1,5 @@
-import { type Tile as TileType, type TileColor } from '../../../shared/types';
-import { isJoker } from '../../../shared/gameLogic';
+import { type Tile as TileType, type TileColor } from 'shared/types';
+import { isJoker } from 'shared/gameLogic';
 import TileComponent from './Tile';
 
 interface DrawAreaProps {

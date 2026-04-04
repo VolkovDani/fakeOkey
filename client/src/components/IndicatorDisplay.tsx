@@ -1,4 +1,4 @@
-import { type Tile as TileType, type TileColor } from '../../../shared/types';
+import { type Tile as TileType, type TileColor } from 'shared/types';
 import TileComponent from './Tile';
 
 interface IndicatorDisplayProps {

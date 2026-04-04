@@ -6,7 +6,8 @@
     "dev": "npx tsx --watch index.ts"
   },
   "dependencies": {
-    "ws": "^8.18.0"
+    "ws": "^8.18.0",
+    "shared": "*"
   },
   "devDependencies": {
     "tsx": "^4.19.0",

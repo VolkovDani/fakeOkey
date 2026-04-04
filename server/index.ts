@@ -9,7 +9,7 @@ import type {
   GameState,
   ClientMessage,
   ServerMessage,
-} from "../shared/types";
+} from "shared/types";
 
 import {
   createTileSet,
@@ -19,7 +19,7 @@ import {
   validateMeld,
   checkOpeningRequirement,
   calculateHandValue,
-} from "../shared/gameLogic";
+} from "shared/gameLogic";
 
 // ---------------------------------------------------------------------------
 // Data structures

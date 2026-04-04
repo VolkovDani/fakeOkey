@@ -1,4 +1,4 @@
-import { type Tile as TileType } from '../../../shared/types';
+import { type Tile as TileType } from 'shared/types';
 
 const COLOR_MAP: Record<string, string> = {
   red: '#d32f2f',

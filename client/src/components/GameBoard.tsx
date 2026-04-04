@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { type GameState, type ClientMessage } from '../../../shared/types';
+import { type GameState, type ClientMessage } from 'shared/types';
 import PlayerHand from './PlayerHand';
 import OpponentPanel from './OpponentPanel';
 import MeldsArea from './MeldsArea';

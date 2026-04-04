@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { type ClientMessage } from '../../../shared/types';
+import { type ClientMessage } from 'shared/types';
 
 interface LobbyScreenProps {
   roomId: string | null;
