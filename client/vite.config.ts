@@ -13,4 +13,15 @@ export default defineConfig({
       },
     },
   },
+  preview: {
+    allowedHosts: ['okey.ru'],
+    port: 3000,
+    proxy: {
+      '/ws': {
+        target: 'ws://localhost:3001',
+        ws: true,
+        rewriteWsOrigin: true,
+      },
+    },
+  }
 });
