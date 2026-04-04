@@ -44,6 +44,9 @@ export default function OpponentPanel({ player, isCurrentTurn, jokerTile, positi
           maxWidth: isVertical ? '70px' : '100px',
         }}>
           {player.name}
+          {player.disconnected && (
+            <span style={{ color: '#ff5252', fontSize: '0.7rem', fontWeight: 400 }}> ({t('disconnected')})</span>
+          )}
         </div>
         <div style={{ fontSize: '0.75rem', opacity: 0.6 }}>
           {player.score} {t('pts')}

@@ -22,6 +22,7 @@ export interface PlayerState {
   score: number;
   isOpened: boolean;
   meldMethod: "sets_runs" | "pairs" | null;
+  disconnected: boolean;
 }
 
 export interface GameState {
@@ -51,7 +52,8 @@ export type ServerMessage =
   | { type: "room_created"; roomId: string }
   | { type: "player_joined"; name: string; players: string[] }
   | { type: "round_end"; scores: Record<string, number>; totalScores: Record<string, number> }
-  | { type: "game_over"; finalScores: Record<string, number> };
+  | { type: "game_over"; finalScores: Record<string, number> }
+  | { type: "player_left"; playerId: string; playerName: string };
 
 export interface RoundContext {
   winnerId: string;

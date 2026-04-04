@@ -32,6 +32,7 @@ const ru: Translations = {
 
   pts: 'очк.',
   turn: 'ХОД',
+  disconnected: 'отключён',
 
   indicator: 'Индикатор',
   joker: 'Джокер:',

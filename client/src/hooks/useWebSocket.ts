@@ -75,6 +75,9 @@ export function useWebSocket(url: string): UseWebSocketReturn {
           case 'game_over':
             setTotalScores(msg.finalScores);
             break;
+          case 'player_left':
+            // game_state broadcast will update the UI
+            break;
         }
       };
 

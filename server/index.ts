@@ -34,6 +34,7 @@ interface ServerPlayer {
   score: number;
   isOpened: boolean;
   meldMethod: "sets_runs" | "pairs" | null;
+  disconnected: boolean;
 }
 
 interface Room {
@@ -48,6 +49,7 @@ interface Room {
   maxPlayers: number;
   turnState: "must_draw" | "can_meld" | "must_discard";
   playerOrder: string[];
+  closeTimer: ReturnType<typeof setTimeout> | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -80,6 +82,7 @@ const send = (ws: WebSocket, msg: ServerMessage): void => {
 
 const broadcast = (room: Room, msg: ServerMessage): void => {
   for (const player of room.players.values()) {
+    if (player.disconnected) continue;
     send(player.ws, msg);
   }
 };
@@ -96,6 +99,7 @@ const buildPlayerState = (player: ServerPlayer): PlayerState => ({
   score: player.score,
   isOpened: player.isOpened,
   meldMethod: player.meldMethod,
+  disconnected: player.disconnected,
 });
 
 const buildGameState = (room: Room, forPlayer: ServerPlayer): GameState => ({
@@ -113,6 +117,7 @@ const buildGameState = (room: Room, forPlayer: ServerPlayer): GameState => ({
 
 const broadcastGameState = (room: Room): void => {
   for (const player of room.players.values()) {
+    if (player.disconnected) continue;
     const state = buildGameState(room, player);
     send(player.ws, { type: "game_state", state });
   }
@@ -167,7 +172,12 @@ const startRound = (room: Room): void => {
 };
 
 const advanceTurn = (room: Room): void => {
-  room.currentPlayerIndex = (room.currentPlayerIndex + 1) % room.playerOrder.length;
+  const count = room.playerOrder.length;
+  for (let i = 0; i < count; i++) {
+    room.currentPlayerIndex = (room.currentPlayerIndex + 1) % count;
+    const player = room.players.get(room.playerOrder[room.currentPlayerIndex]);
+    if (player && !player.disconnected) break;
+  }
   room.turnState = "must_draw";
 };
 
@@ -191,6 +201,7 @@ const handleCreateRoom = (ws: WebSocket, msg: Extract<ClientMessage, { type: "cr
     score: 0,
     isOpened: false,
     meldMethod: null,
+    disconnected: false,
   };
 
   const room: Room = {
@@ -205,6 +216,7 @@ const handleCreateRoom = (ws: WebSocket, msg: Extract<ClientMessage, { type: "cr
     maxPlayers: msg.maxPlayers,
     turnState: "must_draw",
     playerOrder: [playerId],
+    closeTimer: null,
   };
 
   rooms.set(roomId, room);
@@ -222,10 +234,42 @@ const handleJoin = (ws: WebSocket, msg: Extract<ClientMessage, { type: "join" }>
     send(ws, { type: "error", message: "Room not found." });
     return;
   }
+
+  // Rejoin mid-game: take over a disconnected player's slot
   if (room.phase !== "lobby") {
-    send(ws, { type: "error", message: "Game already in progress." });
+    let disconnectedPlayer: ServerPlayer | undefined;
+    for (const p of room.players.values()) {
+      if (p.disconnected) {
+        disconnectedPlayer = p;
+        break;
+      }
+    }
+
+    if (!disconnectedPlayer) {
+      send(ws, { type: "error", message: "Game already in progress." });
+      return;
+    }
+
+    disconnectedPlayer.ws = ws;
+    disconnectedPlayer.name = msg.name;
+    disconnectedPlayer.disconnected = false;
+    playerRooms.set(ws, { roomId: room.id, playerId: disconnectedPlayer.id });
+
+    console.log(`[Room ${room.id}] "${msg.name}" took over slot ${disconnectedPlayer.id}.`);
+
+    // Clear close timer if no more disconnected players
+    const stillDisconnected = [...room.players.values()].some((p) => p.disconnected);
+    if (!stillDisconnected && room.closeTimer) {
+      clearTimeout(room.closeTimer);
+      room.closeTimer = null;
+    }
+
+    const names = getPlayerNames(room);
+    broadcast(room, { type: "player_joined", name: msg.name, players: names });
+    broadcastGameState(room);
     return;
   }
+
   if (room.players.size >= room.maxPlayers) {
     send(ws, { type: "error", message: "Room is full." });
     return;
@@ -241,6 +285,7 @@ const handleJoin = (ws: WebSocket, msg: Extract<ClientMessage, { type: "join" }>
     score: 0,
     isOpened: false,
     meldMethod: null,
+    disconnected: false,
   };
 
   room.players.set(playerId, player);
@@ -601,32 +646,49 @@ const handleDisconnect = (ws: WebSocket): void => {
       broadcast(room, { type: "player_joined", name: playerName, players: names });
     }
   } else {
-    // Game in progress: remove player, end game if needed
-    room.players.delete(playerId);
-    room.playerOrder = room.playerOrder.filter((id) => id !== playerId);
-
-    if (room.players.size < 2) {
-      // Not enough players to continue
-      console.log(`[Room ${roomId}] Not enough players. Ending game.`);
-      const finalScores: Record<string, number> = {};
-      for (const p of room.players.values()) {
-        finalScores[p.id] = p.score;
-      }
-      broadcast(room, { type: "game_over", finalScores });
-
-      for (const p of room.players.values()) {
-        playerRooms.delete(p.ws);
-      }
-      rooms.delete(roomId);
-    } else {
-      // Adjust current player index if needed
-      if (room.currentPlayerIndex >= room.playerOrder.length) {
-        room.currentPlayerIndex = 0;
-      }
-      // If it was the disconnected player's turn, reset turn state
-      room.turnState = "must_draw";
-      broadcastGameState(room);
+    // Game in progress: mark player as disconnected, keep their state
+    if (player) {
+      player.disconnected = true;
     }
+
+    broadcast(room, { type: "player_left", playerId, playerName });
+
+    // If ALL players are disconnected, delete room immediately
+    const connectedPlayers = [...room.players.values()].filter((p) => !p.disconnected);
+    if (connectedPlayers.length === 0) {
+      if (room.closeTimer) clearTimeout(room.closeTimer);
+      rooms.delete(roomId);
+      console.log(`[Room ${roomId}] All players disconnected. Room deleted.`);
+      return;
+    }
+
+    // If it was the disconnected player's turn, advance
+    const currentId = room.playerOrder[room.currentPlayerIndex];
+    if (currentId === playerId) {
+      advanceTurn(room);
+    }
+
+    broadcastGameState(room);
+
+    // Start 2-minute close timer (reset if one already exists)
+    if (room.closeTimer) clearTimeout(room.closeTimer);
+    room.closeTimer = setTimeout(() => {
+      const still = [...room.players.values()].some((p) => p.disconnected);
+      if (still && rooms.has(roomId)) {
+        console.log(`[Room ${roomId}] 2-minute timeout. Closing room.`);
+        const finalScores: Record<string, number> = {};
+        for (const p of room.players.values()) {
+          finalScores[p.id] = p.score;
+        }
+        for (const p of room.players.values()) {
+          if (!p.disconnected) {
+            send(p.ws, { type: "game_over", finalScores });
+            playerRooms.delete(p.ws);
+          }
+        }
+        rooms.delete(roomId);
+      }
+    }, 2 * 60 * 1000);
   }
 };
 

@@ -35,6 +35,7 @@ const en = {
   // Game - OpponentPanel
   pts: 'pts',
   turn: 'TURN',
+  disconnected: 'disconnected',
 
   // Game - IndicatorDisplay
   indicator: 'Indicator',
