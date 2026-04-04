@@ -260,10 +260,6 @@ const handleJoin = (ws: WebSocket, msg: Extract<ClientMessage, { type: "join" }>
   }
 };
 
-const handleDrawTile = (room: Room, player: ServerPlayer): void => {
-  // source parameter removed for simplicity here — we get it from the outer handler
-};
-
 const handleDrawTileFromSource = (
   room: Room,
   player: ServerPlayer,
