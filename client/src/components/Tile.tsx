@@ -14,9 +14,10 @@ interface TileProps {
   faceDown?: boolean;
   onClick?: () => void;
   small?: boolean;
+  dragging?: boolean;
 }
 
-export default function Tile({ tile, selected, isJoker, faceDown, onClick, small }: TileProps) {
+export default function Tile({ tile, selected, isJoker, faceDown, onClick, small, dragging }: TileProps) {
   const width = small ? 35 : 50;
   const height = small ? 50 : 70;
 
@@ -34,6 +35,7 @@ export default function Tile({ tile, selected, isJoker, faceDown, onClick, small
     position: 'relative',
     fontWeight: 700,
     fontSize: small ? '0.75rem' : '1.1rem',
+    opacity: dragging ? 0.4 : 1,
   };
 
   if (faceDown) {

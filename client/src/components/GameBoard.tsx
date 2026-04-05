@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { type GameState, type ClientMessage } from 'shared/types';
 import PlayerHand from './PlayerHand';
 import OpponentPanel from './OpponentPanel';
@@ -12,6 +12,7 @@ interface GameBoardProps {
 
 export default function GameBoard({ gameState, sendMessage }: GameBoardProps) {
   const [selectedTileIds, setSelectedTileIds] = useState<Set<number>>(new Set());
+  const [handOrder, setHandOrder] = useState<number[]>([]);
 
   const {
     myHand,
@@ -24,6 +25,30 @@ export default function GameBoard({ gameState, sendMessage }: GameBoardProps) {
     myId,
     turnState,
   } = gameState;
+
+  // Sync handOrder with myHand: preserve existing order, append new tiles, remove gone tiles
+  useEffect(() => {
+    const handIds = new Set(myHand.map((t) => t.id));
+    setHandOrder((prev) => {
+      const kept = prev.filter((id) => handIds.has(id));
+      const keptSet = new Set(kept);
+      const added = myHand.filter((t) => !keptSet.has(t.id)).map((t) => t.id);
+      return [...kept, ...added];
+    });
+  }, [myHand]);
+
+  const orderedHand = handOrder
+    .map((id) => myHand.find((t) => t.id === id))
+    .filter((t): t is (typeof myHand)[number] => t != null);
+
+  const handleReorder = useCallback((fromIndex: number, toIndex: number) => {
+    setHandOrder((prev) => {
+      const next = [...prev];
+      const [moved] = next.splice(fromIndex, 1);
+      next.splice(toIndex, 0, moved);
+      return next;
+    });
+  }, []);
 
   const isMyTurn = currentPlayerId === myId;
   const opponents = players.filter((p) => p.id !== myId);
@@ -184,7 +209,7 @@ export default function GameBoard({ gameState, sendMessage }: GameBoardProps) {
 
       {/* Bottom: my hand */}
       <PlayerHand
-        tiles={myHand}
+        tiles={orderedHand}
         jokerTile={jokerTile}
         selectedTileIds={selectedTileIds}
         onTileClick={handleTileClick}
@@ -192,6 +217,7 @@ export default function GameBoard({ gameState, sendMessage }: GameBoardProps) {
         turnState={turnState}
         onMeld={handleMeld}
         onDiscard={handleDiscard}
+        onReorder={handleReorder}
       />
 
     </div>

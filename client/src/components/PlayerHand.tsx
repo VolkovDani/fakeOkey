@@ -1,3 +1,4 @@
+import { useState, useRef } from 'react';
 import { type Tile as TileType, type TileColor } from 'shared/types';
 import { isJoker } from 'shared/gameLogic';
 import TileComponent from './Tile';
@@ -12,6 +13,7 @@ interface PlayerHandProps {
   turnState: string;
   onMeld: () => void;
   onDiscard: () => void;
+  onReorder: (fromIndex: number, toIndex: number) => void;
 }
 
 export default function PlayerHand({
@@ -23,8 +25,11 @@ export default function PlayerHand({
   turnState,
   onMeld,
   onDiscard,
+  onReorder,
 }: PlayerHandProps) {
   const { t } = useI18n();
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const dragIndexRef = useRef<number | null>(null);
   const selectedCount = selectedTileIds.size;
 
   const TURN_STATE_LABELS: Record<string, string> = {
@@ -104,14 +109,49 @@ export default function PlayerHand({
         minHeight: '80px',
         paddingBottom: '10px',
       }}>
-        {tiles.map((tile) => (
-          <TileComponent
+        {tiles.map((tile, index) => (
+          <div
             key={tile.id}
-            tile={tile}
-            selected={selectedTileIds.has(tile.id)}
-            isJoker={isJoker(tile, jokerTile)}
-            onClick={() => onTileClick(tile.id)}
-          />
+            draggable
+            onDragStart={(e) => {
+              dragIndexRef.current = index;
+              e.dataTransfer.effectAllowed = 'move';
+            }}
+            onDragOver={(e) => {
+              e.preventDefault();
+              e.dataTransfer.dropEffect = 'move';
+              setDragOverIndex(index);
+            }}
+            onDragLeave={() => {
+              setDragOverIndex((prev) => (prev === index ? null : prev));
+            }}
+            onDrop={(e) => {
+              e.preventDefault();
+              if (dragIndexRef.current !== null && dragIndexRef.current !== index) {
+                onReorder(dragIndexRef.current, index);
+              }
+              dragIndexRef.current = null;
+              setDragOverIndex(null);
+            }}
+            onDragEnd={() => {
+              dragIndexRef.current = null;
+              setDragOverIndex(null);
+            }}
+            style={{
+              position: 'relative',
+              borderLeft: dragOverIndex === index && dragIndexRef.current !== null && dragIndexRef.current !== index
+                ? '3px solid #1976d2'
+                : '3px solid transparent',
+            }}
+          >
+            <TileComponent
+              tile={tile}
+              selected={selectedTileIds.has(tile.id)}
+              isJoker={isJoker(tile, jokerTile)}
+              dragging={dragIndexRef.current === index}
+              onClick={() => onTileClick(tile.id)}
+            />
+          </div>
         ))}
       </div>
     </div>
