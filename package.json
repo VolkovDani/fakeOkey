@@ -6,7 +6,7 @@
   "scripts": {
     "dev:client": "cd client && npm run dev",
     "dev:server": "cd server && npx tsx --watch index.ts",
-    "prod:client": "cd client && npm run preview --host",
+    "prod:client": "cd client && npm run preview",
     "prod:server": "cd server && npx tsx index.ts",
     "prod:client:build": "cd client && npm run build",
     "dev": "concurrently \"npm run dev:client\" \"npm run dev:server\"",
