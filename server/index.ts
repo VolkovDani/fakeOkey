@@ -231,7 +231,7 @@ const handleCreateRoom = (ws: WebSocket, msg: Extract<ClientMessage, { type: "cr
 const handleJoin = (ws: WebSocket, msg: Extract<ClientMessage, { type: "join" }>): void => {
   const room = rooms.get(msg.roomId);
   if (!room) {
-    send(ws, { type: "error", message: "Room not found." });
+    send(ws, { type: "error", code: "error_roomNotFound" });
     return;
   }
 
@@ -246,7 +246,7 @@ const handleJoin = (ws: WebSocket, msg: Extract<ClientMessage, { type: "join" }>
     }
 
     if (!disconnectedPlayer) {
-      send(ws, { type: "error", message: "Game already in progress." });
+      send(ws, { type: "error", code: "error_gameInProgress" });
       return;
     }
 
@@ -271,7 +271,7 @@ const handleJoin = (ws: WebSocket, msg: Extract<ClientMessage, { type: "join" }>
   }
 
   if (room.players.size >= room.maxPlayers) {
-    send(ws, { type: "error", message: "Room is full." });
+    send(ws, { type: "error", code: "error_roomFull" });
     return;
   }
 
@@ -312,17 +312,17 @@ const handleDrawTileFromSource = (
   source: "pile" | "discard"
 ): void => {
   if (room.playerOrder[room.currentPlayerIndex] !== player.id) {
-    send(player.ws, { type: "error", message: "It is not your turn." });
+    send(player.ws, { type: "error", code: "error_notYourTurn" });
     return;
   }
   if (room.turnState !== "must_draw") {
-    send(player.ws, { type: "error", message: "You have already drawn a tile this turn." });
+    send(player.ws, { type: "error", code: "error_alreadyDrawn" });
     return;
   }
 
   if (source === "pile") {
     if (room.drawPile.length === 0) {
-      send(player.ws, { type: "error", message: "Draw pile is empty." });
+      send(player.ws, { type: "error", code: "error_drawPileEmpty" });
       return;
     }
     const tile = room.drawPile.pop()!;
@@ -330,7 +330,7 @@ const handleDrawTileFromSource = (
     console.log(`[Room ${room.id}] ${player.name} drew from pile. (${room.drawPile.length} remain)`);
   } else {
     if (room.discardPile.length === 0) {
-      send(player.ws, { type: "error", message: "Discard pile is empty." });
+      send(player.ws, { type: "error", code: "error_discardPileEmpty" });
       return;
     }
     const tile = room.discardPile.pop()!;
@@ -352,11 +352,11 @@ const handleMeld = (
   tileIds: number[]
 ): void => {
   if (room.playerOrder[room.currentPlayerIndex] !== player.id) {
-    send(player.ws, { type: "error", message: "It is not your turn." });
+    send(player.ws, { type: "error", code: "error_notYourTurn" });
     return;
   }
   if (room.turnState !== "can_meld" && room.turnState !== "must_discard") {
-    send(player.ws, { type: "error", message: "You cannot meld right now." });
+    send(player.ws, { type: "error", code: "error_cannotExtendNow" });
     return;
   }
 
@@ -365,7 +365,7 @@ const handleMeld = (
   for (const tileId of tileIds) {
     const tile = player.hand.find((t) => t.id === tileId);
     if (!tile) {
-      send(player.ws, { type: "error", message: `Tile ${tileId} not found in your hand.` });
+      send(player.ws, { type: "error", code: "error_tileNotInHand", params: { tileId } });
       return;
     }
     tiles.push(tile);
@@ -374,7 +374,7 @@ const handleMeld = (
   // Validate the meld
   const validation = validateMeld(tiles, room.jokerInfo!);
   if (!validation.valid || !validation.type) {
-    send(player.ws, { type: "error", message: "Invalid meld." });
+    send(player.ws, { type: "error", code: "error_invalidMeld" });
     return;
   }
 
@@ -383,14 +383,11 @@ const handleMeld = (
   // Check meld method consistency
   if (player.meldMethod !== null) {
     if (player.meldMethod === "pairs" && meldType !== "pair") {
-      send(player.ws, { type: "error", message: "You have chosen pairs. You can only meld pairs." });
+      send(player.ws, { type: "error", code: "error_onlyPairs" });
       return;
     }
     if (player.meldMethod === "sets_runs" && meldType === "pair") {
-      send(player.ws, {
-        type: "error",
-        message: "You have chosen sets/runs. You cannot meld pairs.",
-      });
+      send(player.ws, { type: "error", code: "error_noPairs" });
       return;
     }
   } else {
@@ -436,17 +433,17 @@ const handleExtendMeld = (
   tileId: number
 ): void => {
   if (room.playerOrder[room.currentPlayerIndex] !== player.id) {
-    send(player.ws, { type: "error", message: "It is not your turn." });
+    send(player.ws, { type: "error", code: "error_notYourTurn" });
     return;
   }
   if (room.turnState !== "can_meld" && room.turnState !== "must_discard") {
-    send(player.ws, { type: "error", message: "You cannot extend melds right now." });
+    send(player.ws, { type: "error", code: "error_cannotExtendNow" });
     return;
   }
 
   // Player must be opened to extend melds
   if (!player.isOpened) {
-    send(player.ws, { type: "error", message: "You must open before extending melds." });
+    send(player.ws, { type: "error", code: "error_mustOpenFirst" });
     return;
   }
 
@@ -458,20 +455,20 @@ const handleExtendMeld = (
   }
 
   if (!targetMeld) {
-    send(player.ws, { type: "error", message: "Meld not found." });
+    send(player.ws, { type: "error", code: "error_meldNotFound" });
     return;
   }
 
   // Pairs cannot be extended
   if (targetMeld.type === "pair") {
-    send(player.ws, { type: "error", message: "Pairs cannot be extended." });
+    send(player.ws, { type: "error", code: "error_pairsNoExtend" });
     return;
   }
 
   // Find tile in hand
   const tileIndex = player.hand.findIndex((t) => t.id === tileId);
   if (tileIndex === -1) {
-    send(player.ws, { type: "error", message: "Tile not found in your hand." });
+    send(player.ws, { type: "error", code: "error_tileNotInHand" });
     return;
   }
 
@@ -481,7 +478,7 @@ const handleExtendMeld = (
   // Validate the resulting meld is still valid
   const validation = validateMeld(extendedTiles, room.jokerInfo!);
   if (!validation.valid) {
-    send(player.ws, { type: "error", message: "Adding this tile would make the meld invalid." });
+    send(player.ws, { type: "error", code: "error_extendInvalid" });
     return;
   }
 
@@ -498,18 +495,18 @@ const handleExtendMeld = (
 
 const handleDiscard = (room: Room, player: ServerPlayer, tileId: number): void => {
   if (room.playerOrder[room.currentPlayerIndex] !== player.id) {
-    send(player.ws, { type: "error", message: "It is not your turn." });
+    send(player.ws, { type: "error", code: "error_notYourTurn" });
     return;
   }
   if (room.turnState === "must_draw") {
-    send(player.ws, { type: "error", message: "You must draw a tile first." });
+    send(player.ws, { type: "error", code: "error_mustDrawFirst" });
     return;
   }
 
   // Find tile in hand
   const tileIndex = player.hand.findIndex((t) => t.id === tileId);
   if (tileIndex === -1) {
-    send(player.ws, { type: "error", message: "Tile not found in your hand." });
+    send(player.ws, { type: "error", code: "error_tileNotInHand" });
     return;
   }
 
@@ -702,7 +699,7 @@ const handleMessage = (ws: WebSocket, data: string): void => {
   try {
     msg = JSON.parse(data) as ClientMessage;
   } catch {
-    send(ws, { type: "error", message: "Invalid JSON." });
+    send(ws, { type: "error", code: "error_invalidJson" });
     return;
   }
 
@@ -719,17 +716,17 @@ const handleMessage = (ws: WebSocket, data: string): void => {
       case "draw_tile": {
         const info = playerRooms.get(ws);
         if (!info) {
-          send(ws, { type: "error", message: "You are not in a room." });
+          send(ws, { type: "error", code: "error_notInRoom" });
           return;
         }
         const room = rooms.get(info.roomId);
         const player = room?.players.get(info.playerId);
         if (!room || !player) {
-          send(ws, { type: "error", message: "Room or player not found." });
+          send(ws, { type: "error", code: "error_roomOrPlayerNotFound" });
           return;
         }
         if (room.phase !== "playing") {
-          send(ws, { type: "error", message: "Game is not in progress." });
+          send(ws, { type: "error", code: "error_gameNotInProgress" });
           return;
         }
         handleDrawTileFromSource(room, player, msg.source);
@@ -738,17 +735,17 @@ const handleMessage = (ws: WebSocket, data: string): void => {
       case "meld": {
         const info = playerRooms.get(ws);
         if (!info) {
-          send(ws, { type: "error", message: "You are not in a room." });
+          send(ws, { type: "error", code: "error_notInRoom" });
           return;
         }
         const room = rooms.get(info.roomId);
         const player = room?.players.get(info.playerId);
         if (!room || !player) {
-          send(ws, { type: "error", message: "Room or player not found." });
+          send(ws, { type: "error", code: "error_roomOrPlayerNotFound" });
           return;
         }
         if (room.phase !== "playing") {
-          send(ws, { type: "error", message: "Game is not in progress." });
+          send(ws, { type: "error", code: "error_gameNotInProgress" });
           return;
         }
         handleMeld(room, player, msg.tileIds);
@@ -757,17 +754,17 @@ const handleMessage = (ws: WebSocket, data: string): void => {
       case "extend_meld": {
         const info = playerRooms.get(ws);
         if (!info) {
-          send(ws, { type: "error", message: "You are not in a room." });
+          send(ws, { type: "error", code: "error_notInRoom" });
           return;
         }
         const room = rooms.get(info.roomId);
         const player = room?.players.get(info.playerId);
         if (!room || !player) {
-          send(ws, { type: "error", message: "Room or player not found." });
+          send(ws, { type: "error", code: "error_roomOrPlayerNotFound" });
           return;
         }
         if (room.phase !== "playing") {
-          send(ws, { type: "error", message: "Game is not in progress." });
+          send(ws, { type: "error", code: "error_gameNotInProgress" });
           return;
         }
         handleExtendMeld(room, player, msg.meldId, msg.tileId);
@@ -776,29 +773,29 @@ const handleMessage = (ws: WebSocket, data: string): void => {
       case "discard": {
         const info = playerRooms.get(ws);
         if (!info) {
-          send(ws, { type: "error", message: "You are not in a room." });
+          send(ws, { type: "error", code: "error_notInRoom" });
           return;
         }
         const room = rooms.get(info.roomId);
         const player = room?.players.get(info.playerId);
         if (!room || !player) {
-          send(ws, { type: "error", message: "Room or player not found." });
+          send(ws, { type: "error", code: "error_roomOrPlayerNotFound" });
           return;
         }
         if (room.phase !== "playing") {
-          send(ws, { type: "error", message: "Game is not in progress." });
+          send(ws, { type: "error", code: "error_gameNotInProgress" });
           return;
         }
         handleDiscard(room, player, msg.tileId);
         break;
       }
       default: {
-        send(ws, { type: "error", message: "Unknown message type." });
+        send(ws, { type: "error", code: "error_unknownMessage" });
       }
     }
   } catch (err) {
     console.error("Error handling message:", err);
-    send(ws, { type: "error", message: "Internal server error." });
+    send(ws, { type: "error", code: "error_internalError" });
   }
 };
 

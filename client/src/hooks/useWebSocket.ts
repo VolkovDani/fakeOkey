@@ -67,7 +67,7 @@ export function useWebSocket(url: string): UseWebSocketReturn {
             setGameState(msg.state);
             break;
           case 'error':
-            setError(msg.message);
+            setError(msg.code);
             break;
           case 'room_created':
             setRoomId(msg.roomId);
@@ -103,7 +103,7 @@ export function useWebSocket(url: string): UseWebSocketReturn {
 
       ws.onerror = () => {
         if (unmountedRef.current) return;
-        setError('connection_error');
+        setError('connectionError');
       };
     }
 

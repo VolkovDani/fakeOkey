@@ -48,7 +48,7 @@ export type ClientMessage =
 
 export type ServerMessage =
   | { type: "game_state"; state: GameState }
-  | { type: "error"; message: string }
+  | { type: "error"; code: string; params?: Record<string, string | number> }
   | { type: "room_created"; roomId: string }
   | { type: "player_joined"; name: string; players: string[] }
   | { type: "round_end"; scores: Record<string, number>; totalScores: Record<string, number> }

@@ -47,6 +47,31 @@ const ru: Translations = {
   total: 'Итого',
   win: 'ПОБЕДА',
   nextRound: 'Следующий раунд',
+
+  // Ошибки
+  error_roomNotFound: 'Комната не найдена.',
+  error_gameInProgress: 'Игра уже идёт.',
+  error_roomFull: 'Комната заполнена.',
+  error_notYourTurn: 'Сейчас не ваш ход.',
+  error_alreadyDrawn: 'Вы уже взяли фишку в этом ходу.',
+  error_drawPileEmpty: 'Колода пуста.',
+  error_discardPileEmpty: 'Сброс пуст.',
+  error_tileNotInHand: 'Фишка {tileId} не найдена в вашей руке.',
+  error_invalidMeld: 'Недопустимая комбинация.',
+  error_onlyPairs: 'Вы выбрали пары. Можно выкладывать только пары.',
+  error_noPairs: 'Вы выбрали группы/ряды. Нельзя выкладывать пары.',
+  error_cannotExtendNow: 'Сейчас нельзя дополнять комбинации.',
+  error_mustOpenFirst: 'Сначала нужно открыться.',
+  error_meldNotFound: 'Комбинация не найдена.',
+  error_pairsNoExtend: 'Пары нельзя дополнять.',
+  error_extendInvalid: 'Добавление этой фишки сделает комбинацию недопустимой.',
+  error_mustDrawFirst: 'Сначала возьмите фишку.',
+  error_invalidJson: 'Неверный JSON.',
+  error_notInRoom: 'Вы не в комнате.',
+  error_roomOrPlayerNotFound: 'Комната или игрок не найдены.',
+  error_gameNotInProgress: 'Игра не идёт.',
+  error_unknownMessage: 'Неизвестный тип сообщения.',
+  error_internalError: 'Внутренняя ошибка сервера.',
 };
 
 export default ru;

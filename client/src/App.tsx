@@ -32,7 +32,7 @@ function App() {
     );
   }
 
-  const errorText = error === 'connection_error' ? t('connectionError') : error;
+  const errorText = error ? t(error as Parameters<typeof t>[0]) : null;
 
   return (
     <div className="app">
