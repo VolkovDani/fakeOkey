@@ -296,6 +296,7 @@ const handleJoin = (ws: WebSocket, msg: Extract<ClientMessage, { type: "join" }>
 
   console.log(`[Room ${room.id}] "${msg.name}" joined (${playerId}). Players: ${names.join(", ")}`);
 
+  send(ws, { type: "room_created", roomId: room.id });
   broadcast(room, { type: "player_joined", name: msg.name, players: names });
 
   // Auto-start when room is full
