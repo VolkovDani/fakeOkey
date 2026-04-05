@@ -14,7 +14,7 @@ export default defineConfig({
     },
   },
   preview: {
-    allowedHosts: ['okey.ru'],
+    allowedHosts: ['okey.io'],
     port: 3000,
     proxy: {
       '/ws': {
